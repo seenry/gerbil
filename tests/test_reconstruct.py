@@ -107,13 +107,14 @@ def main() -> None:
         # The patch now exists; a second run without --force must refuse to
         # overwrite (no TTY to confirm), bailing before any sandbox work.
         before = patch_path.read_text()
+        refused = False
         try:
             cli.cmd_reconstruct_patch(SimpleNamespace(
                 session_file=str(log), at=str(root), skip_cache=True, force=False,
             ))
-            check("refuses overwrite without --force / TTY", False)
         except SystemExit:
-            check("refuses overwrite without --force / TTY", True)
+            refused = True
+        check("refuses overwrite without --force / TTY", refused)
         check("existing patch untouched when refused",
               patch_path.read_text() == before)
 
