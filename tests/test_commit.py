@@ -52,6 +52,12 @@ def main() -> None:
         (root / "lakefile.lean").write_text("-- lakefile\n")
         (root / "Hello.lean").write_text("def hello := 1\n")
         host("init", "-q", "-b", "main", cwd=root)
+        # `gerbil commit`'s `git am` runs as its own subprocess and never sees
+        # host()'s `-c` flags, so it needs a committer identity in the repo's
+        # config -- a machine with no global identity (a CI runner) otherwise
+        # fails with "empty ident name".
+        host("config", "user.email", "t@t", cwd=root)
+        host("config", "user.name", "t", cwd=root)
         host("add", "-A", cwd=root)
         host("commit", "-qm", "init", cwd=root)
         # Contaminate like a real repo: a secret branch with its own commit, a
